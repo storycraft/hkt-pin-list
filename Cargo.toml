@@ -1,11 +1,11 @@
 [package]
-name = "hkt-intrusive-linked-list"
+name = "hkt-pin-list"
 description = "HKT intrusive linked list"
 version = "0.1.0"
 edition = "2021"
 authors = ["storycraft <storycraft@pancake.sh>"]
 license = "MIT"
-repository = "https://github.com/storycraft/hkt-intrusive-linked-list"
+repository = "https://github.com/storycraft/hkt-pin-list"
 
 [dependencies]
 pinned-aliasable = "0.1.3"

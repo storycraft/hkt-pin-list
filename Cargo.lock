@@ -3,7 +3,7 @@
 version = 4
 
 [[package]]
-name = "hkt-intrusive-linked-list"
+name = "hkt-pin-list"
 version = "0.1.0"
 dependencies = [
  "pin-project-lite",
