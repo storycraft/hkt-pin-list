@@ -84,13 +84,13 @@ impl<T> Drop for Entry<T> {
     }
 }
 
-struct Link {
+pub struct Link {
     next: Next,
     parent: Parent,
 }
 
 impl Link {
-    fn unlink(&self) {
+    pub fn unlink(&self) {
         if let Some(parent) = self.parent.take() {
             let next = self.next.take();
 

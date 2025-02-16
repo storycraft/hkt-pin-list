@@ -23,7 +23,9 @@ impl EntryPtr {
         self.0.cast().as_ref()
     }
 
-    pub(super) unsafe fn link(&self) -> &Link {
+    /// # Safety
+    /// Pointer must be convertible to a reference
+    pub unsafe fn link(&self) -> &Link {
         &(*self.0.as_ptr()).link
     }
 }
