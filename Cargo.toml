@@ -1,0 +1,10 @@
+[package]
+name = "hkt-intrusive-linked-list"
+version = "0.1.0"
+edition = "2021"
+authors = ["storycraft <storycraft@pancake.sh>"]
+license = "MIT"
+
+[dependencies]
+pinned-aliasable = "0.1.3"
+pin-project-lite = "0.2"
