@@ -40,13 +40,13 @@ macro_rules! define_safe_list {
             pub fn iter<R>(
                 self: ::core::pin::Pin<&Self>,
                 f: impl for<$($lt),*> ::core::ops::FnOnce(
-                    $crate::iter::Iter<'_, $ty>
+                    $crate::Iter<'_, $ty>
                 ) -> R
             ) -> R
             {
                 // SAFETY: hide unbound lifetimes in higher kinded closure
                 f(
-                    unsafe { $crate::iter::Iter::from(self.project_ref().raw.iter()) }
+                    unsafe { $crate::Iter::from(self.project_ref().raw.iter()) }
                 )
             }
 
