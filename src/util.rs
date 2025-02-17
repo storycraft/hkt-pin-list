@@ -10,7 +10,8 @@ pin_project! {
     pub struct UnsafePinned<T> {
         #[pin]
         inner: T,
-        _pinned: PhantomPinned,
+        #[pin]
+        _pin: PhantomPinned,
     }
 }
 
@@ -18,14 +19,16 @@ impl<T> UnsafePinned<T> {
     pub const fn new(inner: T) -> Self {
         Self {
             inner,
-            _pinned: PhantomPinned,
+            _pin: PhantomPinned,
         }
     }
 
+    #[inline]
     pub fn get(&self) -> &T {
         &self.inner
     }
 
+    #[inline]
     pub fn get_pinned(self: Pin<&Self>) -> Pin<&T> {
         self.project_ref().inner
     }

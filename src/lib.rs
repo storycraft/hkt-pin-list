@@ -43,11 +43,11 @@ mod tests {
 
         list.as_ref().take(|list| {
             list.iter(|mut iter| {
-                assert_eq!(iter.next().map(Node::value), Some(&&mut 1234));
+                assert_eq!(iter.next().map(|node| node.get_ref().value()), Some(&&mut 1234));
                 let _a = node1;
                 let _b = node2;
-                assert_eq!(iter.next().map(Node::value), Some(&&mut 5678));
-                assert_eq!(iter.next().map(Node::value), None);
+                assert_eq!(iter.next().map(|node| node.get_ref().value()), Some(&&mut 5678));
+                assert_eq!(iter.next().map(|node| node.get_ref().value()), None);
             });
         });
     }
