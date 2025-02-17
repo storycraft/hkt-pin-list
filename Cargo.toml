@@ -1,6 +1,6 @@
 [package]
 name = "hkt-pin-list"
-description = "HKT intrusive linked list"
+description = "Self managed HKT intrusive linked list"
 version = "0.1.0"
 edition = "2021"
 authors = ["storycraft <storycraft@pancake.sh>"]

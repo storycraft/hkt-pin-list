@@ -1,4 +1,4 @@
-use core::marker::PhantomData;
+use core::{marker::PhantomData, pin::Pin};
 
 use crate::{node::Node, RawIter};
 
@@ -19,9 +19,9 @@ impl<'a, T> Iter<'a, T> {
 }
 
 impl<'a, T> Iterator for Iter<'a, T> {
-    type Item = &'a Node<T>;
+    type Item = Pin<&'a Node<T>>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        Some(unsafe { self.inner.next()?.get_extended_ref() })
+        Some(unsafe { Pin::new_unchecked(self.inner.next()?.get_extended_ref()) })
     }
 }
