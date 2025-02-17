@@ -5,16 +5,17 @@ pub mod __private;
 mod iter;
 mod macros;
 mod node;
+mod util;
 
 pub use iter::Iter;
-pub use node::{iter::Iter as RawIter, list::RawList, ptr::EntryPtr, Entry, Link, Node};
+pub use node::{iter::Iter as RawIter, list::RawList, ptr::NodePtr, Link, Node};
 
 #[cfg(test)]
 mod tests {
     use core::pin::pin;
 
     use super::Node;
-    use crate::{define_safe_list, node::Entry};
+    use crate::define_safe_list;
 
     #[test]
     fn test() {
@@ -31,22 +32,22 @@ mod tests {
         let node1 = node1.into_ref();
         let node2 = pin!(Node::new(&mut b));
         let node2 = node2.into_ref();
-        list.as_ref().push_front(node2.entry());
-        list.as_ref().push_front(node1.entry());
+        list.as_ref().push_front(node2);
+        list.as_ref().push_front(node1);
 
         let list = list.as_mut();
 
-        list2.push_front(node1.entry());
-        node1.entry().unlink();
-        list.as_ref().push_front(node1.entry());
+        list2.push_front(node1);
+        node1.unlink();
+        list.as_ref().push_front(node1);
 
         list.as_ref().take(|list| {
             list.iter(|mut iter| {
-                assert_eq!(iter.next().map(Entry::value), Some(&&mut 1234));
+                assert_eq!(iter.next().map(Node::value), Some(&&mut 1234));
                 let _a = node1;
                 let _b = node2;
-                assert_eq!(iter.next().map(Entry::value), Some(&&mut 5678));
-                assert_eq!(iter.next().map(Entry::value), None);
+                assert_eq!(iter.next().map(Node::value), Some(&&mut 5678));
+                assert_eq!(iter.next().map(Node::value), None);
             });
         });
     }

@@ -1,15 +1,15 @@
 use core::marker::PhantomData;
 
-use super::ptr::EntryPtr;
+use super::ptr::NodePtr;
 
 #[derive(Debug)]
 pub struct Iter<'a> {
-    next: Option<EntryPtr>,
+    next: Option<NodePtr>,
     _ph: PhantomData<&'a ()>,
 }
 
 impl Iterator for Iter<'_> {
-    type Item = EntryPtr;
+    type Item = NodePtr;
 
     fn next(&mut self) -> Option<Self::Item> {
         let v = self.next.take()?;
@@ -19,7 +19,7 @@ impl Iterator for Iter<'_> {
 }
 
 impl Iter<'_> {
-    pub(super) unsafe fn new(start: Option<EntryPtr>) -> Self {
+    pub(super) unsafe fn new(start: Option<NodePtr>) -> Self {
         Self {
             next: start,
             _ph: PhantomData,

@@ -22,23 +22,23 @@ macro_rules! define_safe_list {
             }
 
             /// Check if list is empty
-            pub fn is_empty(self: ::core::pin::Pin<&Self>) -> bool {
-                self.project_ref().raw.is_empty()
+            pub fn is_empty(&self) -> bool {
+                self.raw.is_empty()
             }
 
             /// Link a node to start
             pub fn push_front<$($lt),*>(
                 self: ::core::pin::Pin<&Self>,
-                entry: &$crate::Entry<$ty>
+                node: ::core::pin::Pin<&$crate::Node<$ty>>
             ) {
                 unsafe {
-                    self.project_ref().raw.push_front(entry);
+                    self.project_ref().raw.push_front(node);
                 }
             }
 
             /// Traverse list from the start until `f` returns true
             pub fn iter<R>(
-                self: ::core::pin::Pin<&Self>,
+                &self,
                 f: impl for<$($lt),*> ::core::ops::FnOnce(
                     $crate::Iter<'_, $ty>
                 ) -> R
@@ -46,16 +46,16 @@ macro_rules! define_safe_list {
             {
                 // SAFETY: hide unbound lifetimes in higher kinded closure
                 f(
-                    unsafe { $crate::Iter::from(self.project_ref().raw.iter()) }
+                    unsafe { $crate::Iter::from(self.raw.iter()) }
                 )
             }
 
             pub fn take<R>(
-                self: ::core::pin::Pin<&Self>,
+                &self,
                 f: impl FnOnce(::core::pin::Pin<&Self>) -> R
             ) -> R {
                 // SAFETY: casting transparent struct
-                    self.project_ref().raw.take(
+                    self.raw.take(
                         move |inner| f(
                             unsafe {
                                 *(&inner as *const _ as *const ::core::pin::Pin<&Self>)
@@ -65,8 +65,8 @@ macro_rules! define_safe_list {
             }
 
             /// Clear the list
-            pub fn clear(self: ::core::pin::Pin<&Self>) {
-                self.project_ref().raw.clear();
+            pub fn clear(&self) {
+                self.raw.clear();
             }
         }
 
