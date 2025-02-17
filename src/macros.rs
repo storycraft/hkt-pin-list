@@ -1,6 +1,6 @@
 
 #[macro_export]
-/// Define a new Safe wrapper around [`raw::RawList`]
+/// Define a new Safe wrapper around `RawList`
 macro_rules! define_safe_list {
     ($vis:vis $name:ident = for<$($lt:lifetime),*> $ty:ty) => {
         $crate::__private::pin_project! {

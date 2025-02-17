@@ -8,7 +8,7 @@ mod node;
 mod util;
 
 pub use iter::Iter;
-pub use node::{iter::Iter as RawIter, list::RawList, ptr::NodePtr, Link, Node};
+pub use node::{iter::RawIter, list::RawList, ptr::NodePtr, Link, Node};
 
 #[cfg(test)]
 mod tests {

@@ -1,14 +1,11 @@
-use core::marker::PhantomData;
-
 use super::ptr::NodePtr;
 
 #[derive(Debug)]
-pub struct Iter<'a> {
+pub struct RawIter {
     next: Option<NodePtr>,
-    _ph: PhantomData<&'a ()>,
 }
 
-impl Iterator for Iter<'_> {
+impl Iterator for RawIter {
     type Item = NodePtr;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -18,11 +15,10 @@ impl Iterator for Iter<'_> {
     }
 }
 
-impl Iter<'_> {
+impl RawIter {
     pub(super) unsafe fn new(start: Option<NodePtr>) -> Self {
         Self {
             next: start,
-            _ph: PhantomData,
         }
     }
 }

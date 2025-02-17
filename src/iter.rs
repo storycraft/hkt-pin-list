@@ -4,13 +4,13 @@ use crate::{node::Node, RawIter};
 
 #[derive(Debug)]
 pub struct Iter<'a, T> {
-    inner: RawIter<'a>,
+    inner: RawIter,
     _ph: PhantomData<&'a T>,
 }
 
 impl<'a, T> Iter<'a, T> {
     #[doc(hidden)]
-    pub unsafe fn from(raw: RawIter<'a>) -> Self {
+    pub unsafe fn from(raw: RawIter) -> Self {
         Self {
             inner: raw,
             _ph: PhantomData,
