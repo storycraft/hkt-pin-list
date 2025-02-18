@@ -5,7 +5,7 @@ macro_rules! define_hkt_list {
         #[derive(Debug)]
         #[repr(transparent)]
         $vis struct $name {
-            raw: $crate::List<$crate::static_of!(for<$($lt),*> $ty)>,
+            raw: $crate::LinkedList<$crate::static_of!(for<$($lt),*> $ty)>,
         }
 
         #[allow(unused)]
@@ -14,7 +14,7 @@ macro_rules! define_hkt_list {
             #[inline(always)]
             pub const fn new() -> Self {
                 Self {
-                    raw: $crate::List::new(),
+                    raw: $crate::LinkedList::new(),
                 }
             }
 

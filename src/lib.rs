@@ -8,7 +8,7 @@ mod util;
 mod list;
 
 pub use node::{ptr::NodePtr, Link, Node};
-pub use list::{List, iter::Iter};
+pub use list::{LinkedList, iter::Iter};
 
 #[cfg(test)]
 mod tests {

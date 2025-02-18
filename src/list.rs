@@ -18,12 +18,12 @@ use super::Node;
 
 pin_project! {
     /// Raw intrusive hkt linked list
-    pub struct List<T: ?Sized> {
+    pub struct LinkedList<T: ?Sized> {
         #[pin]
         start: UnsafePinned<Next<T>>,
     }
 
-    impl<T: ?Sized> PinnedDrop for List<T> {
+    impl<T: ?Sized> PinnedDrop for LinkedList<T> {
         fn drop(this: Pin<&mut Self>) {
             // Unlink all entries before dropping list
             this.clear();
@@ -31,7 +31,7 @@ pin_project! {
     }
 }
 
-impl<T: ?Sized> List<T> {
+impl<T: ?Sized> LinkedList<T> {
     pub const fn new() -> Self {
         Self {
             start: UnsafePinned::new(Next::new(None)),
@@ -82,13 +82,13 @@ impl<T: ?Sized> List<T> {
     }
 }
 
-impl<T: ?Sized> Default for List<T> {
+impl<T: ?Sized> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T: ?Sized + Debug> Debug for List<T> {
+impl<T: ?Sized + Debug> Debug for LinkedList<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         self.iter(|iter| f.debug_list().entries(iter).finish())
     }
