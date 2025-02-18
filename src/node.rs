@@ -1,6 +1,6 @@
 pub mod ptr;
 
-use core::{cell::Cell, pin::Pin, ptr::NonNull};
+use core::{cell::Cell, fmt::Debug, pin::Pin, ptr::NonNull};
 use pin_project_lite::pin_project;
 use ptr::NodePtr;
 
@@ -10,7 +10,6 @@ pub(super) type Next<T> = Cell<Option<NodePtr<T>>>;
 pub(super) type Parent<T> = Cell<Option<NonNull<Next<T>>>>;
 
 pin_project! {
-    #[derive(Debug)]
     // Use repr(C) to ensure `link` is accessible from generic erased pointer
     #[repr(C)]
     pub struct Node<T: ?Sized> {
@@ -28,7 +27,10 @@ pin_project! {
 }
 
 impl<T: ?Sized> Node<T> {
-    pub fn new(value: T) -> Self where T: Sized {
+    pub fn new(value: T) -> Self
+    where
+        T: Sized,
+    {
         Self {
             link: UnsafePinned::new(Link {
                 next: Next::new(None),
@@ -66,6 +68,15 @@ impl<T: ?Sized> Node<T> {
                 .parent
                 .set(Some(NonNull::from(&link.next)));
         }
+    }
+}
+
+impl<T: ?Sized + Debug> Debug for Node<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Node")
+            .field("linked", &self.linked())
+            .field("value", &self.value.get())
+            .finish()
     }
 }
 
