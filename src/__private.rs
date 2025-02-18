@@ -4,12 +4,13 @@ mod inner {
     pub trait Sealed {}
 
     pub trait Of<'a> {
-        type T;
+        type T: ?Sized;
     }
 
     impl<'a, F, T> Of<'a> for F
     where
         F: FnOnce(&'a ()) -> T,
+        T: ?Sized
     {
         type T = T;
     }
@@ -22,7 +23,7 @@ const _: () = {
 };
 
 pub trait ForLt: inner::Sealed {
-    type Of<'a>;
+    type Of<'a>: ?Sized;
 }
 
 impl<T> ForLt for T
