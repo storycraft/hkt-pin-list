@@ -1,50 +1,22 @@
+pub use core::marker::PhantomData as Pd;
+
+pub use paste::paste;
 pub use pin_project_lite::pin_project;
 
 mod inner {
     pub trait Sealed {}
-
-    pub trait Of<'a> {
-        type T: ?Sized;
-    }
-
-    impl<'a, F, T> Of<'a> for F
-    where
-        F: FnOnce(&'a ()) -> T,
-        T: ?Sized
-    {
-        type T = T;
-    }
-
-    impl<T> Sealed for T where T: for<'a> Of<'a> {}
 }
 
-const _: () = {
-    mod inner {}
-};
-
-pub trait ForLt: inner::Sealed {
-    type Of<'a>: ?Sized;
+pub trait Of<'a>: inner::Sealed {
+    type T: ?Sized;
 }
 
-impl<T> ForLt for T
+impl<'a, T> inner::Sealed for T where T: Of<'a> {}
+
+impl<'a, F, T> Of<'a> for F
 where
-    T: for<'a> inner::Of<'a>,
+    T: ?Sized,
+    F: FnOnce(&'a ()) -> Pd<T>,
 {
-    type Of<'a> = <T as inner::Of<'a>>::T;
-}
-
-#[macro_export]
-#[doc(hidden)]
-macro_rules! static_of {
-    (for<$($lt:lifetime),*> $ty:ty) => {
-        $crate::static_of!(@inner [$($lt),*], $ty)
-    };
-
-    (@inner [$lt:lifetime $(,$rest:lifetime)*], $ty:ty) => {
-        <for<$lt> fn(&$lt ()) -> $crate::static_of!(@inner [$($rest),*], $ty) as $crate::__private::ForLt>::Of<'static>
-    };
-
-    (@inner [], $ty:ty) => {
-        <fn(&()) -> $ty as $crate::__private::ForLt>::Of<'static>
-    };
+    type T = T;
 }

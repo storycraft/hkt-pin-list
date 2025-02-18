@@ -5,10 +5,15 @@ macro_rules! define_hkt_list {
         $(#[$meta:meta])*
         $vis:vis $name:ident = for<$($lt:lifetime),*> $ty:ty
     ) => {
-        $(#[$meta])*
-        #[repr(transparent)]
-        $vis struct $name {
-            raw: $crate::LinkedList<$crate::static_of!(for<$($lt),*> $ty)>,
+        $crate::__private::paste! {
+            #[doc(hidden)]
+            type [<__ $name>]<$($lt),*> = <fn(&()) -> $crate::__private::Pd<$ty> as $crate::__private::Of<'static>>::T;
+
+            $(#[$meta])*
+            #[repr(transparent)]
+            $vis struct $name {
+                raw: $crate::LinkedList<<fn(&()) -> $crate::__private::Pd<[<__ $name>]> as $crate::__private::Of<'static>>::T>,
+            }
         }
 
         #[allow(unused)]

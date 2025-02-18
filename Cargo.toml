@@ -9,3 +9,4 @@ repository = "https://github.com/storycraft/hkt-pin-list"
 
 [dependencies]
 pin-project-lite = "0.2"
+paste = "1"

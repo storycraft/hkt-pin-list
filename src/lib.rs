@@ -2,13 +2,13 @@
 
 #[doc(hidden)]
 pub mod __private;
+mod list;
 mod macros;
 mod node;
 mod util;
-mod list;
 
+pub use list::{iter::Iter, LinkedList};
 pub use node::{ptr::NodePtr, Link, Node};
-pub use list::{LinkedList, iter::Iter};
 
 #[cfg(test)]
 mod tests {
@@ -43,10 +43,16 @@ mod tests {
 
         list.as_ref().take(|list| {
             list.iter(|mut iter| {
-                assert_eq!(iter.next().map(|node| node.get_ref().value()), Some(&&mut 1234));
+                assert_eq!(
+                    iter.next().map(|node| node.get_ref().value()),
+                    Some(&&mut 1234)
+                );
                 let _a = node1;
                 let _b = node2;
-                assert_eq!(iter.next().map(|node| node.get_ref().value()), Some(&&mut 5678));
+                assert_eq!(
+                    iter.next().map(|node| node.get_ref().value()),
+                    Some(&&mut 5678)
+                );
                 assert_eq!(iter.next().map(|node| node.get_ref().value()), None);
             });
         });
