@@ -24,7 +24,7 @@ impl<T: ?Sized> UnsafePinned<T> {
     }
 
     #[inline]
-    pub fn get(&self) -> &T {
+    pub const fn get(&self) -> &T {
         &self.inner
     }
 

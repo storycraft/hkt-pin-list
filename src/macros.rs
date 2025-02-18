@@ -1,42 +1,45 @@
-
 #[macro_export]
-/// Define a new Safe wrapper around `RawList`
-macro_rules! define_safe_list {
+/// Define a new hkt wrapper around `List`
+macro_rules! define_hkt_list {
     ($vis:vis $name:ident = for<$($lt:lifetime),*> $ty:ty) => {
-        $crate::__private::pin_project! {
-            #[derive(Debug)]
-            #[repr(transparent)]    
-            $vis struct $name {
-                #[pin]
-                raw: $crate::RawList,
-            }
+        #[derive(Debug)]
+        #[repr(transparent)]
+        $vis struct $name {
+            raw: $crate::List<$crate::static_of!(for<$($lt),*> $ty)>,
         }
 
         #[allow(unused)]
         impl $name {
             /// Create a new List
-            pub fn new() -> Self {
+            #[inline(always)]
+            pub const fn new() -> Self {
                 Self {
-                    raw: $crate::RawList::new(),
+                    raw: $crate::List::new(),
                 }
             }
 
             /// Check if list is empty
+            #[inline(always)]
             pub fn is_empty(&self) -> bool {
                 self.raw.is_empty()
             }
 
             /// Link a node to start
+            #[inline(always)]
             pub fn push_front<$($lt),*>(
                 self: ::core::pin::Pin<&Self>,
                 node: ::core::pin::Pin<&$crate::Node<$ty>>
             ) {
+                // SAFETY: projection and extend lifetime
                 unsafe {
-                    self.project_ref().raw.push_front(node);
+                    ::core::pin::Pin::new_unchecked(
+                        &self.raw
+                    ).push_front(::core::mem::transmute(node));
                 }
             }
 
             /// Create iterator
+            #[inline(always)]
             pub fn iter<R>(
                 &self,
                 f: impl for<$($lt),*> ::core::ops::FnOnce(
@@ -44,12 +47,10 @@ macro_rules! define_safe_list {
                 ) -> R
             ) -> R
             {
-                // SAFETY: hide unbound lifetimes in higher kinded closure
-                f(
-                    unsafe { $crate::Iter::from(self.raw.iter()) }
-                )
+                self.raw.iter(f)
             }
 
+            #[inline(always)]
             pub fn take<R>(
                 &self,
                 f: impl FnOnce(::core::pin::Pin<&Self>) -> R
@@ -65,6 +66,7 @@ macro_rules! define_safe_list {
             }
 
             /// Clear the list
+            #[inline(always)]
             pub fn clear(&self) {
                 self.raw.clear();
             }
@@ -78,6 +80,6 @@ macro_rules! define_safe_list {
     };
 
     ($vis:vis $name:ident = $ty:ty) => {
-        $crate::define_safe_list!($vis $name = for<> $ty);
+        $crate::define_hkt_list!($vis $name = for<> $ty);
     };
 }

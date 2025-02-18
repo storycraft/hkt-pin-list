@@ -2,24 +2,24 @@
 
 #[doc(hidden)]
 pub mod __private;
-mod iter;
 mod macros;
 mod node;
 mod util;
+mod list;
 
-pub use iter::Iter;
-pub use node::{iter::RawIter, list::RawList, ptr::NodePtr, Link, Node};
+pub use node::{ptr::NodePtr, Link, Node};
+pub use list::{List, iter::Iter};
 
 #[cfg(test)]
 mod tests {
     use core::pin::pin;
 
     use super::Node;
-    use crate::define_safe_list;
+    use crate::define_hkt_list;
 
     #[test]
     fn test() {
-        define_safe_list!(List = &mut i32);
+        define_hkt_list!(List = &mut i32);
 
         let mut list = pin!(List::new());
         let list2 = pin!(List::new());

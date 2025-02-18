@@ -1,3 +1,5 @@
+pub mod iter;
+
 use core::{
     fmt::Debug,
     pin::{pin, Pin},
@@ -9,19 +11,19 @@ use pin_project_lite::pin_project;
 use crate::{
     node::{ptr::NodePtr, Next},
     util::UnsafePinned,
-    RawIter,
+    Iter,
 };
 
 use super::Node;
 
 pin_project! {
     /// Raw intrusive hkt linked list
-    pub struct RawList {
+    pub struct List<T: ?Sized> {
         #[pin]
-        start: UnsafePinned<Next>,
+        start: UnsafePinned<Next<T>>,
     }
 
-    impl PinnedDrop for RawList {
+    impl<T: ?Sized> PinnedDrop for List<T> {
         fn drop(this: Pin<&mut Self>) {
             // Unlink all entries before dropping list
             this.clear();
@@ -29,14 +31,14 @@ pin_project! {
     }
 }
 
-impl RawList {
-    pub fn new() -> Self {
+impl<T: ?Sized> List<T> {
+    pub const fn new() -> Self {
         Self {
             start: UnsafePinned::new(Next::new(None)),
         }
     }
 
-    fn start(&self) -> Option<NodePtr> {
+    pub(crate) fn start(&self) -> Option<NodePtr<T>> {
         self.start.get().get()
     }
 
@@ -44,9 +46,7 @@ impl RawList {
         self.start().is_none()
     }
 
-    /// # Safety
-    /// Item type must be a same type except lifetimes.
-    pub unsafe fn push_front<T>(self: Pin<&Self>, node: Pin<&Node<T>>) {
+    pub fn push_front(self: Pin<&Self>, node: Pin<&Node<T>>) {
         let this = self.project_ref();
         let start = this.start.get();
         node.link(start);
@@ -68,29 +68,28 @@ impl RawList {
         f(list)
     }
 
-    /// # Safety
-    /// Current iterating node must not drop before next iteration
-    pub unsafe fn iter(&self) -> RawIter {
-        RawIter::new(self.start())
+    pub fn iter<R>(&self, f: impl FnOnce(Iter<T>) -> R) -> R {
+        // SAFETY: wrap in closure so nodes cannot drop during iterator is alive
+        f(unsafe { Iter::new(self) })
     }
 
     pub fn clear(&self) {
-        for ptr in unsafe { self.iter() } {
-            unsafe { ptr.link() }.unlink();
-        }
+        self.iter(|iter| {
+            for node in iter {
+                node.unlink();
+            }
+        });
     }
 }
 
-impl Default for RawList {
+impl<T: ?Sized> Default for List<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Debug for RawList {
+impl<T: ?Sized + Debug> Debug for List<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_list()
-            .entries(unsafe { self.iter() })
-            .finish_non_exhaustive()
+        self.iter(|iter| f.debug_list().entries(iter).finish())
     }
 }

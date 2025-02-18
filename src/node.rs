@@ -1,5 +1,3 @@
-pub mod iter;
-pub mod list;
 pub mod ptr;
 
 use core::{cell::Cell, pin::Pin, ptr::NonNull};
@@ -8,8 +6,8 @@ use ptr::NodePtr;
 
 use crate::util::UnsafePinned;
 
-pub(super) type Next = Cell<Option<NodePtr>>;
-pub(super) type Parent = Cell<Option<NonNull<Next>>>;
+pub(super) type Next<T> = Cell<Option<NodePtr<T>>>;
+pub(super) type Parent<T> = Cell<Option<NonNull<Next<T>>>>;
 
 pin_project! {
     #[derive(Debug)]
@@ -17,7 +15,7 @@ pin_project! {
     #[repr(C)]
     pub struct Node<T: ?Sized> {
         #[pin]
-        link: UnsafePinned<Link>,
+        link: UnsafePinned<Link<T>>,
         #[pin]
         value: UnsafePinned<T>,
     }
@@ -56,7 +54,7 @@ impl<T: ?Sized> Node<T> {
         self.link.get().unlink();
     }
 
-    fn link(self: Pin<&Self>, start: &Next) {
+    pub(super) fn link(self: Pin<&Self>, start: &Next<T>) {
         self.unlink();
         let link = self.link.get();
         link.next.set(start.get());
@@ -75,12 +73,12 @@ impl<T: ?Sized> Node<T> {
 unsafe impl<T: ?Sized + Send> Send for Node<T> {}
 
 #[derive(Debug)]
-pub struct Link {
-    next: Next,
-    parent: Parent,
+pub struct Link<T: ?Sized> {
+    pub(super) next: Next<T>,
+    pub(super) parent: Parent<T>,
 }
 
-impl Link {
+impl<T: ?Sized> Link<T> {
     pub fn linked(&self) -> bool {
         self.parent.get().is_some()
     }

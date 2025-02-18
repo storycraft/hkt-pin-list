@@ -3,29 +3,37 @@ use core::ptr::NonNull;
 use crate::node::{Link, Node};
 
 #[repr(transparent)]
-#[derive(Debug, Clone, Copy)]
-pub struct NodePtr(NonNull<Node<()>>);
+#[derive(Debug)]
+pub struct NodePtr<T: ?Sized>(NonNull<Node<T>>);
 
-impl NodePtr {
-    pub fn new<T: ?Sized>(node: &Node<T>) -> Self {
-        Self(NonNull::from(node).cast())
+impl<T: ?Sized> NodePtr<T> {
+    pub fn new(node: &Node<T>) -> Self {
+        Self(NonNull::from(node))
     }
 
     /// # Safety
     /// Pointer must be convertible to a reference
-    pub unsafe fn get_extended_ref<'a, T>(self) -> &'a Node<T> {
-        self.0.cast().as_ref()
+    pub unsafe fn get_extended_ref<'a>(self) -> &'a Node<T> {
+        self.0.as_ref()
     }
 
     /// # Safety
     /// Pointer must be convertible to a reference
-    pub unsafe fn as_ref<T>(&self) -> &Node<T> {
-        self.0.cast().as_ref()
+    pub unsafe fn as_ref(&self) -> &Node<T> {
+        self.0.as_ref()
     }
 
     /// # Safety
     /// Pointer must be convertible to a reference
-    pub unsafe fn link(&self) -> &Link {
+    pub unsafe fn link(&self) -> &Link<T> {
         (*self.0.as_ptr()).link.get()
     }
 }
+
+impl<T: ?Sized> Clone for NodePtr<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<T: ?Sized> Copy for NodePtr<T> {}
