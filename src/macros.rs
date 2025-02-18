@@ -36,7 +36,7 @@ macro_rules! define_safe_list {
                 }
             }
 
-            /// Traverse list from the start until `f` returns true
+            /// Create iterator
             pub fn iter<R>(
                 &self,
                 f: impl for<$($lt),*> ::core::ops::FnOnce(
