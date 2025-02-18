@@ -3,12 +3,12 @@ use core::{marker::PhantomData, pin::Pin};
 use crate::{node::Node, RawIter};
 
 #[derive(Debug)]
-pub struct Iter<'a, T> {
+pub struct Iter<'a, T: ?Sized> {
     inner: RawIter,
     _ph: PhantomData<&'a T>,
 }
 
-impl<'a, T> Iter<'a, T> {
+impl<T: ?Sized> Iter<'_, T> {
     #[doc(hidden)]
     pub unsafe fn from(raw: RawIter) -> Self {
         Self {

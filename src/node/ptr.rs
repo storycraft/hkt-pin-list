@@ -7,7 +7,7 @@ use crate::node::{Link, Node};
 pub struct NodePtr(NonNull<Node<()>>);
 
 impl NodePtr {
-    pub fn new<T>(node: &Node<T>) -> Self {
+    pub fn new<T: ?Sized>(node: &Node<T>) -> Self {
         Self(NonNull::from(node).cast())
     }
 

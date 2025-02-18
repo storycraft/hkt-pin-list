@@ -15,22 +15,22 @@ pin_project! {
     #[derive(Debug)]
     // Use repr(C) to ensure `link` is accessible from generic erased pointer
     #[repr(C)]
-    pub struct Node<T> {
+    pub struct Node<T: ?Sized> {
         #[pin]
         link: UnsafePinned<Link>,
         #[pin]
         value: UnsafePinned<T>,
     }
 
-    impl<T> PinnedDrop for Node<T> {
+    impl<T: ?Sized> PinnedDrop for Node<T> {
         fn drop(this: Pin<&mut Self>) {
             this.link.get().unlink();
         }
     }
 }
 
-impl<T> Node<T> {
-    pub fn new(value: T) -> Self {
+impl<T: ?Sized> Node<T> {
+    pub fn new(value: T) -> Self where T: Sized {
         Self {
             link: UnsafePinned::new(Link {
                 next: Next::new(None),
@@ -72,7 +72,7 @@ impl<T> Node<T> {
 }
 
 // Node is safe to send if T is Send and not pinned
-unsafe impl<T: Send> Send for Node<T> {}
+unsafe impl<T: ?Sized + Send> Send for Node<T> {}
 
 #[derive(Debug)]
 pub struct Link {

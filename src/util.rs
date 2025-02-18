@@ -7,19 +7,19 @@ pin_project! {
     ///
     /// See: <https://github.com/rust-lang/rust/pull/82834>
     #[repr(transparent)]
-    pub struct UnsafePinned<T> {
-        #[pin]
-        inner: T,
+    pub struct UnsafePinned<T: ?Sized> {
         #[pin]
         _pin: PhantomPinned,
+        #[pin]
+        inner: T,
     }
 }
 
-impl<T> UnsafePinned<T> {
-    pub const fn new(inner: T) -> Self {
+impl<T: ?Sized> UnsafePinned<T> {
+    pub const fn new(inner: T) -> Self where T: Sized {
         Self {
-            inner,
             _pin: PhantomPinned,
+            inner,
         }
     }
 
@@ -34,8 +34,8 @@ impl<T> UnsafePinned<T> {
     }
 }
 
-impl<T: Debug> Debug for UnsafePinned<T> {
+impl<T: ?Sized + Debug> Debug for UnsafePinned<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_tuple("UnsafePinned").field(&self.inner).finish()
+        f.debug_tuple("UnsafePinned").field(&&self.inner).finish()
     }
 }
