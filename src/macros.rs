@@ -1,8 +1,11 @@
 #[macro_export]
 /// Define a new hkt wrapper around `List`
 macro_rules! define_hkt_list {
-    ($vis:vis $name:ident = for<$($lt:lifetime),*> $ty:ty) => {
-        #[derive(Debug)]
+    (
+        $(#[$meta:meta])*
+        $vis:vis $name:ident = for<$($lt:lifetime),*> $ty:ty
+    ) => {
+        $(#[$meta])*
         #[repr(transparent)]
         $vis struct $name {
             raw: $crate::LinkedList<$crate::static_of!(for<$($lt),*> $ty)>,
@@ -79,7 +82,13 @@ macro_rules! define_hkt_list {
         }
     };
 
-    ($vis:vis $name:ident = $ty:ty) => {
-        $crate::define_hkt_list!($vis $name = for<> $ty);
+    (
+        $(#[$meta:meta])*
+        $vis:vis $name:ident = $ty:ty
+    ) => {
+        $crate::define_hkt_list!(
+            $(#[$meta])*
+            $vis $name = for<> $ty
+        );
     };
 }
