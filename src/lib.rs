@@ -17,20 +17,19 @@ mod tests {
     use super::Node;
     use crate::define_hkt_list;
 
+    extern crate alloc;
+
     #[test]
     fn test() {
-        define_hkt_list!(List = &mut i32);
+        define_hkt_list!(List = i32);
 
         let mut list = pin!(List::new());
         let list2 = pin!(List::new());
         let list2 = list2.into_ref();
 
-        let mut a = 1234;
-        let mut b = 5678;
-
-        let node1 = pin!(Node::new(&mut a));
+        let node1 = pin!(Node::new(1234));
         let node1 = node1.into_ref();
-        let node2 = pin!(Node::new(&mut b));
+        let node2 = pin!(Node::new(5678));
         let node2 = node2.into_ref();
         list.as_ref().push_front(node2);
         list.as_ref().push_front(node1);
@@ -43,16 +42,10 @@ mod tests {
 
         list.as_ref().take(|list| {
             list.iter(|mut iter| {
-                assert_eq!(
-                    iter.next().map(|node| node.get_ref().value()),
-                    Some(&&mut 1234)
-                );
+                assert_eq!(iter.next().map(|node| node.get_ref().value()), Some(&1234));
                 let _a = node1;
                 let _b = node2;
-                assert_eq!(
-                    iter.next().map(|node| node.get_ref().value()),
-                    Some(&&mut 5678)
-                );
+                assert_eq!(iter.next().map(|node| node.get_ref().value()), Some(&5678));
                 assert_eq!(iter.next().map(|node| node.get_ref().value()), None);
             });
         });

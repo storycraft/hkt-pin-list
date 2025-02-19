@@ -27,6 +27,15 @@ pin_project! {
 impl<T: ?Sized, Dyn: ?Sized> Node<T, Dyn> {
     pub fn new(value: T) -> Self
     where
+        T: Sized + 'static,
+    {
+        unsafe { Self::new_unchecked(value) }
+    }
+
+    /// # Safety
+    /// You must ensure the destructor has run
+    pub unsafe fn new_unchecked(value: T) -> Self
+    where
         T: Sized,
     {
         Self {
