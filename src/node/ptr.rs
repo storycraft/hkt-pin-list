@@ -28,6 +28,12 @@ impl<T: ?Sized> NodePtr<T> {
     pub unsafe fn link(&self) -> &Link<T> {
         (*self.0.as_ptr()).link.get()
     }
+
+    /// # Safety
+    /// Pointer must be convertible to a reference
+    pub unsafe fn link_extended<'a>(self) -> &'a Link<T> {
+        (*self.0.as_ptr()).link.get()
+    }
 }
 
 impl<T: ?Sized> Clone for NodePtr<T> {

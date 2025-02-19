@@ -74,11 +74,9 @@ impl<T: ?Sized> LinkedList<T> {
     }
 
     pub fn clear(&self) {
-        self.iter(|iter| {
-            for node in iter {
-                node.unlink();
-            }
-        });
+        if let Some(start) = self.start().take() {
+            unsafe { start.link() }.unlink_all();
+        }
     }
 }
 
