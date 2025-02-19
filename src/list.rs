@@ -18,12 +18,12 @@ use super::Node;
 
 pin_project! {
     /// Self managed intrusive linked list
-    pub struct LinkedList<T: ?Sized> {
+    pub struct LinkedList<Dyn: ?Sized> {
         #[pin]
-        start: UnsafePinned<Next<T>>,
+        start: UnsafePinned<Next<Dyn>>,
     }
 
-    impl<T: ?Sized> PinnedDrop for LinkedList<T> {
+    impl<Dyn: ?Sized> PinnedDrop for LinkedList<Dyn> {
         fn drop(this: Pin<&mut Self>) {
             // Unlink all entries before dropping list
             this.clear();
@@ -31,14 +31,14 @@ pin_project! {
     }
 }
 
-impl<T: ?Sized> LinkedList<T> {
+impl<Dyn: ?Sized> LinkedList<Dyn> {
     pub const fn new() -> Self {
         Self {
             start: UnsafePinned::new(Next::new(None)),
         }
     }
 
-    pub(crate) fn start(&self) -> Option<NodePtr<T>> {
+    pub(crate) fn start(&self) -> Option<NodePtr<Dyn>> {
         self.start.get().get()
     }
 
@@ -46,7 +46,7 @@ impl<T: ?Sized> LinkedList<T> {
         self.start().is_none()
     }
 
-    pub fn push_front(self: Pin<&Self>, node: Pin<&Node<T>>) {
+    pub fn push_front(self: Pin<&Self>, node: Pin<&Node<Dyn>>) {
         let this = self.project_ref();
         let start = this.start.get();
         node.link(start);
@@ -68,7 +68,7 @@ impl<T: ?Sized> LinkedList<T> {
         f(list)
     }
 
-    pub fn iter<R>(&self, f: impl FnOnce(Iter<T>) -> R) -> R {
+    pub fn iter<R>(&self, f: impl FnOnce(Iter<Dyn>) -> R) -> R {
         // SAFETY: wrap in closure so nodes cannot drop during iterator is alive
         f(unsafe { Iter::new(self) })
     }

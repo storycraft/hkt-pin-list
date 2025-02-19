@@ -12,21 +12,21 @@ pub(super) type Parent<T> = Cell<Option<NonNull<Next<T>>>>;
 pin_project! {
     // Use repr(C) to ensure `link` is accessible from generic erased pointer
     #[repr(C)]
-    pub struct Node<T: ?Sized> {
+    pub struct Node<T: ?Sized, Dyn: ?Sized = T> {
         #[pin]
-        link: UnsafePinned<Link<T>>,
+        link: UnsafePinned<Link<Dyn>>,
         #[pin]
         value: UnsafePinned<T>,
     }
 
-    impl<T: ?Sized> PinnedDrop for Node<T> {
+    impl<T: ?Sized, Dyn: ?Sized> PinnedDrop for Node<T, Dyn> {
         fn drop(this: Pin<&mut Self>) {
             this.link.get().unlink();
         }
     }
 }
 
-impl<T: ?Sized> Node<T> {
+impl<T: ?Sized, Dyn: ?Sized> Node<T, Dyn> {
     pub fn new(value: T) -> Self
     where
         T: Sized,
@@ -55,8 +55,10 @@ impl<T: ?Sized> Node<T> {
     pub fn unlink(&self) {
         self.link.get().unlink();
     }
+}
 
-    pub(super) fn link(self: Pin<&Self>, start: &Next<T>) {
+impl<Dyn: ?Sized> Node<Dyn> {
+    pub(super) fn link(self: Pin<&Self>, start: &Next<Dyn>) {
         self.unlink();
         let link = self.link.get();
         link.next.set(start.get());
@@ -71,7 +73,7 @@ impl<T: ?Sized> Node<T> {
     }
 }
 
-impl<T: ?Sized + Debug> Debug for Node<T> {
+impl<T: ?Sized + Debug, Dyn: ?Sized> Debug for Node<T, Dyn> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("Node")
             .field("linked", &self.linked())
@@ -81,7 +83,7 @@ impl<T: ?Sized + Debug> Debug for Node<T> {
 }
 
 // Node is safe to send if T is Send and not pinned
-unsafe impl<T: ?Sized + Send> Send for Node<T> {}
+unsafe impl<T: ?Sized + Send, Dyn: ?Sized + Send> Send for Node<T, Dyn> {}
 
 #[derive(Debug)]
 pub struct Link<T: ?Sized> {
