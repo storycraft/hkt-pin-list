@@ -10,8 +10,6 @@ pub(super) type Next<T> = Cell<Option<NodePtr<T>>>;
 pub(super) type Parent<T> = Cell<Option<NonNull<Next<T>>>>;
 
 pin_project! {
-    // Use repr(C) to ensure `link` is accessible from generic erased pointer
-    #[repr(C)]
     pub struct Node<T: ?Sized, Dyn: ?Sized = T> {
         #[pin]
         link: UnsafePinned<Link<Dyn>>,
