@@ -33,7 +33,7 @@ impl<T: ?Sized, Dyn: ?Sized> Node<T, Dyn> {
     }
 
     /// # Safety
-    /// You must ensure the borrowed values are valid
+    /// You must make sure the borrowed values are valid even when node is leaked
     pub unsafe fn new_unchecked(value: T) -> Self
     where
         T: Sized,
