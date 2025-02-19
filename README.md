@@ -1,2 +1,2 @@
 # `hkt-pin-list`
-Self managed higher kinded intrusive linked list
+Self managing higher kinded intrusive linked list
