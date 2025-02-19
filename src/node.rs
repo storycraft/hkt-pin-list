@@ -114,8 +114,12 @@ impl<T: ?Sized> Link<T> {
 
     pub(super) fn unlink_all(&self) {
         let mut link = self;
-        while let Some(ptr) = link.next.take() {
-            link.parent.set(None);
+        while let Some(_) = link.parent.take() {
+            let Some(ptr) = link.next.take() else {
+                break;
+            };
+
+            // SAFETY: If linked, next is valid pointer
             link = unsafe { ptr.link_extended() };
         }
     }
