@@ -17,7 +17,7 @@ use crate::{
 use super::Node;
 
 pin_project! {
-    /// Raw intrusive hkt linked list
+    /// Self managed intrusive linked list
     pub struct LinkedList<T: ?Sized> {
         #[pin]
         start: UnsafePinned<Next<T>>,
