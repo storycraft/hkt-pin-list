@@ -4,7 +4,6 @@ mod list;
 mod macros;
 mod node;
 mod util;
-#[doc(hidden)]
 pub mod hkt;
 
 pub use list::{iter::Iter, LinkedList};
