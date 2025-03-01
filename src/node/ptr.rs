@@ -7,8 +7,8 @@ use crate::node::{Link, Node};
 pub struct NodePtr<T: ?Sized>(NonNull<Node<T>>);
 
 impl<T: ?Sized> NodePtr<T> {
-    pub fn new(node: &Node<T>) -> Self {
-        Self(NonNull::from(node))
+    pub fn new(node: NonNull<Node<T>>) -> Self {
+        Self(node)
     }
 
     /// # Safety

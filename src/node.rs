@@ -71,7 +71,7 @@ impl<Dyn: ?Sized> Node<Dyn> {
         link.next.set(start.get());
         link.parent.set(Some(NonNull::from(start)));
 
-        if let Some(old) = start.replace(Some(NodePtr::new(&self))) {
+        if let Some(old) = start.replace(Some(NodePtr::new(NonNull::from(&*self)))) {
             // SAFETY: replace parent of linked start node
             unsafe { old.link() }
                 .parent

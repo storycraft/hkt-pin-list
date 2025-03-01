@@ -8,22 +8,18 @@ use core::{
 
 use pin_project_lite::pin_project;
 
-use crate::{
-    node::{ptr::NodePtr, Next},
-    util::UnsafePinned,
-    Iter,
-};
+use crate::{hkt::ForLt, node::Next, util::UnsafePinned, Iter};
 
 use super::Node;
 
 pin_project! {
     /// Self managed intrusive linked list
-    pub struct LinkedList<T: ?Sized> {
+    pub struct LinkedList<Hkt: ForLt> {
         #[pin]
-        start: UnsafePinned<Next<T>>,
+        start: UnsafePinned<Next<Hkt::Of<'static>>>,
     }
 
-    impl<T: ?Sized> PinnedDrop for LinkedList<T> {
+    impl<Hkt: ForLt> PinnedDrop for LinkedList<Hkt> {
         fn drop(this: Pin<&mut Self>) {
             // Unlink all entries before dropping list
             this.clear();
@@ -31,25 +27,19 @@ pin_project! {
     }
 }
 
-impl<T: ?Sized> LinkedList<T> {
+impl<Hkt: ForLt> LinkedList<Hkt> {
     pub const fn new() -> Self {
         Self {
             start: UnsafePinned::new(Next::new(None)),
         }
     }
 
-    pub(crate) fn start(&self) -> Option<NodePtr<T>> {
-        self.start.get().get()
-    }
-
     pub fn is_empty(&self) -> bool {
-        self.start().is_none()
+        self.start.get().get().is_none()
     }
 
-    pub fn push_front(self: Pin<&Self>, node: Pin<&Node<T>>) {
-        let this = self.project_ref();
-        let start = this.start.get();
-        node.link(start);
+    pub fn push_front(self: Pin<&Self>, node: Pin<&Node<Hkt::Of<'_>>>) {
+        node.link(unsafe { &*(&raw const *self.start.get()).cast() });
     }
 
     pub fn take<R>(&self, f: impl FnOnce(Pin<&Self>) -> R) -> R {
@@ -68,29 +58,32 @@ impl<T: ?Sized> LinkedList<T> {
         f(list)
     }
 
-    pub fn iter<R>(&self, f: impl FnOnce(Iter<T>) -> R) -> R {
+    pub fn iter<R>(&self, f: impl FnOnce(Iter<Hkt::Of<'_>>) -> R) -> R {
         // SAFETY: wrap in closure so nodes cannot drop during iterator is alive
-        f(unsafe { Iter::new(self) })
+        f(unsafe { Iter::new(self.start.get().get()) })
     }
 
     pub fn clear(&self) {
-        if let Some(start) = self.start().take() {
+        if let Some(start) = self.start.get().take() {
             unsafe { start.link() }.unlink_all();
         }
     }
 }
 
-impl<T: ?Sized> Default for LinkedList<T> {
+impl<Hkt: ForLt> Default for LinkedList<Hkt> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T: ?Sized + Debug> Debug for LinkedList<T> {
+impl<Hkt: ForLt> Debug for LinkedList<Hkt>
+where
+    for<'a> Hkt::Of<'a>: Debug,
+{
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         self.iter(|iter| f.debug_list().entries(iter).finish())
     }
 }
 
 // SAFETY: If List can be moved it is always empty list
-unsafe impl<T: ?Sized> Send for LinkedList<T> {}
+unsafe impl<Hkt: ForLt> Send for LinkedList<Hkt> where for<'a> Hkt::Of<'a>: Send {}

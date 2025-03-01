@@ -1,11 +1,11 @@
 #![no_std]
 
-#[doc(hidden)]
-pub mod __private;
 mod list;
 mod macros;
 mod node;
 mod util;
+#[doc(hidden)]
+pub mod hkt;
 
 pub use list::{iter::Iter, LinkedList};
 pub use node::{ptr::NodePtr, Link, Node};
@@ -14,17 +14,16 @@ pub use node::{ptr::NodePtr, Link, Node};
 mod tests {
     use core::pin::pin;
 
+    use crate::LinkedList;
+
     use super::Node;
-    use crate::define_hkt_list;
 
     extern crate alloc;
 
     #[test]
     fn test() {
-        define_hkt_list!(List = i32);
-
-        let mut list = pin!(List::new());
-        let list2 = pin!(List::new());
+        let mut list = pin!(<LinkedList!(i32)>::new());
+        let list2 = pin!(<LinkedList!(i32)>::new());
         let list2 = list2.into_ref();
 
         let node1 = pin!(Node::new(1234));

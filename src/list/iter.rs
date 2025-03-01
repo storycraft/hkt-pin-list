@@ -1,6 +1,6 @@
-use core::{marker::PhantomData, pin::Pin};
-use crate::{LinkedList, NodePtr};
 use super::Node;
+use crate::NodePtr;
+use core::{marker::PhantomData, pin::Pin};
 
 #[derive(Debug)]
 pub struct Iter<'a, T: ?Sized + 'a> {
@@ -19,9 +19,9 @@ impl<'a, T: ?Sized + 'a> Iterator for Iter<'a, T> {
 }
 
 impl<'a, T: ?Sized + 'a> Iter<'a, T> {
-    pub(super) unsafe fn new(list: &'a LinkedList<T>) -> Self {
+    pub(super) unsafe fn new(start: Option<NodePtr<T>>) -> Self {
         Self {
-            next: list.start(),
+            next: start,
             _ph: PhantomData,
         }
     }
