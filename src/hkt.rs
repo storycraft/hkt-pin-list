@@ -15,7 +15,13 @@ pub trait Hkt<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Wrapper<T: ?Sized>(PhantomData<T>);
+pub struct Wrapper<T: ?Sized>(PhantomData<fn(&()) -> &T>);
+
+impl<T: ?Sized + for<'a> Hkt<'a>> Default for Wrapper<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl<T: ?Sized + for<'a> Hkt<'a>> Wrapper<T> {
     pub const fn new() -> Self {
@@ -26,6 +32,3 @@ impl<T: ?Sized + for<'a> Hkt<'a>> Wrapper<T> {
 impl<T: ?Sized> ForLt for Wrapper<T> where T: for<'a> Hkt<'a> {
     type Of<'a> = <T as Hkt<'a>>::T;
 }
-
-unsafe impl<T: ?Sized> Send for Wrapper<T> {}
-unsafe impl<T: ?Sized> Sync for Wrapper<T> {}

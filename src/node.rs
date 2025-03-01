@@ -121,7 +121,7 @@ impl<T: ?Sized> Link<T> {
 
     pub(super) fn unlink_all(&self) {
         let mut link = self;
-        while let Some(_) = link.parent.take() {
+        while link.parent.take().is_some() {
             let Some(ptr) = link.next.take() else {
                 break;
             };
