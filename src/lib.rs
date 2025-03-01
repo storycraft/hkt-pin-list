@@ -4,8 +4,10 @@ mod list;
 mod macros;
 mod node;
 mod util;
+#[doc(hidden)]
 pub mod hkt;
 
+pub use hkt::ForLt;
 pub use list::{iter::Iter, LinkedList};
 pub use node::{ptr::NodePtr, Link, Node};
 
